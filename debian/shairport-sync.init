@@ -1,0 +1,114 @@
+#!/bin/sh
+
+### BEGIN INIT INFO
+# Provides:          shairport-sync
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Should-Start:      avahi-daemon
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Shairport Synchronous AirPlay
+# Description:       Implements a synchronous (multi-room-capable) AirPlay receiver
+### END INIT INFO
+
+# Author: Mike Brady <mikebrady@eircom.net>
+
+DESC="AirPlay Synchronous Audio Service"
+DAEMON=/usr/bin/shairport-sync
+PIDFILE=/run/shairport-sync/shairport-sync.pid
+USER=shairport-sync
+GROUP=nogroup
+START_ARGS="--chuid ${USER}"
+
+test -f /etc/default/shairport && . /etc/default/shairport
+
+# exit if the package is not installed
+[ -x "$DAEMON" ] || { echo "$NAME is not installed" >&2 ; exit 1; }
+
+# Load the VERBOSE setting and other rcS variables
+. /lib/init/vars.sh
+
+# Define LSB log_* functions.
+# Depend on lsb-base (>= 3.2-14) to ensure that this file is present
+# and status_of_proc is working.
+. /lib/lsb/init-functions
+
+do_start_prepare() {
+	# Make sure the PID directory exists and shairport-sync can write to it
+	piddir=$(dirname $PIDFILE)
+	if [ ! -d $piddir ]; then
+		mkdir $piddir
+		chown ${USER}: $piddir
+	fi
+
+	# Add --daemon to the command-line arguments
+	DAEMON_ARGS="--daemon ${DAEMON_ARGS}"
+}
+
+do_start() {
+
+    start-stop-daemon --start --quiet \
+        --pidfile $PIDFILE \
+        --exec $DAEMON \
+        --chuid $USER:$GROUP \
+        -- $DAEMON_ARGS
+}
+
+do_stop() {
+    start-stop-daemon --stop --quiet \
+        --pidfile $PIDFILE \
+        --exec $DAEMON \
+        --retry=TERM/10/KILL/5
+}
+
+do_reload()
+{
+    [ -f $PIDFILE ] && kill -HUP $(cat $PIDFILE) || return 1
+}
+
+case "$1" in
+  start)
+	log_daemon_msg "Starting $DESC" "$NAME"
+        do_start_prepare
+	do_start
+        log_end_msg $?
+	;;
+  stop)
+	log_daemon_msg "Stopping $DESC" "$NAME"
+	do_stop
+        log_end_msg $?
+	;;
+  reload)
+        log_daemon_msg "Reloading $DESC" "$NAME"
+        do_reload
+        log_end_msg $?
+        ;;
+  status)
+	status_of_proc "$DAEMON" "$NAME" && exit 0 || exit $?
+	;;
+  restart|force-reload)
+	log_daemon_msg "Restarting $DESC" "$NAME"
+	do_stop
+	case "$?" in
+	  0|1)
+		do_start
+		case "$?" in
+			0) log_end_msg 0 ;;
+			1) log_end_msg 1 ;; # Old process is still running
+			*) log_end_msg 1 ;; # Failed to start
+		esac
+		;;
+	  *)
+		# Failed to stop
+		log_end_msg 1
+		;;
+	esac
+	;;
+  *)
+	echo "Usage: $0 {start|stop|status|restart|force-reload}" >&2
+	exit 3
+	;;
+esac
+
+exit 0
+
