@@ -13,7 +13,7 @@ You'll need to make sure you have a standard Debian package building
 toolchain, `libsoxr` and `dh_systemd` packages installed. Then it's just
 a matter of:
 
-1. Check out the [Debian source tree](https://anonscm.debian.org/cgit/collab-maint/shairport-sync.git)
+1. Check out the [Debian source tree](https://salsa.debian.org/debian/shairport-sync)
 2. Put the source tarball of `shairport-sync` in the parent directory
 3. Build the package as normal using `dpkg-buildpackage -us -uc`
 
