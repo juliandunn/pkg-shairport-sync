@@ -1,16 +1,14 @@
 # shairport-sync Packaging for Raspberry Pi (Raspbian)
 
 Packaging of [shairport-sync](https://github.com/mikebrady/shairport-sync) has
-gotten significantly easier now that Raspbian is based on `debian/jessie`.
-Basically, you can simply recompile the sources from the [Debian source tree](https://anonscm.debian.org/cgit/collab-maint/shairport-sync.git) and recompile
-them using `debuild`. If it complains about a pinned `debhelper >= 11`
-(because the debian packaging is written for a later version of Debian)
-just remove the pin in `debian/control`.
+gotten significantly easier now that Raspbian is based on `debian/buster`.
+Basically, you can simply recompile the sources from the [Debian source tree](https://salsa.debian.org/debian/shairport-sync.git) and recompile
+them using `debuild`.
 
 ## Building shairport-sync
 
 You'll need to make sure you have a standard Debian package building
-toolchain, `libsoxr` and `dh_systemd` packages installed. Then it's just
+toolchain and `dh_systemd` packages installed. Then it's just
 a matter of:
 
 1. Check out the [Debian source tree](https://salsa.debian.org/debian/shairport-sync)
